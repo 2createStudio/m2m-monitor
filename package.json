@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "nodemailer": "~0.5.2",
+    "winston": "~0.7.2",
+    "mail-notifier": "~0.1.0",
+    "winston-mail": "~0.2.7"
+  }
+}
