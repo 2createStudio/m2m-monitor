@@ -1,9 +1,4 @@
 /**
- * @name index.js
- * @description Main file for mail to message monitor.
- */
-
-/**
  * dependencies
  */
 var winston = require('winston'),
