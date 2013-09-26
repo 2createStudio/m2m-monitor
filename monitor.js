@@ -132,6 +132,8 @@ Monitor.prototype.check = function(){
 			if (matches) {
 				var id = matches[0];
 
+				id = 'willfail';
+
 				// check id
 				if (id != self.currRandom) {
 					self.emit('monitor:check:error', id);
@@ -143,6 +145,9 @@ Monitor.prototype.check = function(){
 
 			// reset lastMail
 			delete self.lastMail;
+
+		} else if (!self.lastMail) {
+			self.emit('monitor:check:error', self.currRandom);
 		}
 
 	}, 1000 * 60 * 10);
