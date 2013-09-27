@@ -63,8 +63,8 @@ function init(){
 	});
 
 	// setup monitor events
-	monitor.on('monitor:check:error', function(id){
-		winston.error('Monitor - test fails with ID: ' + id);
+	monitor.on('monitor:check:error', function(message){
+		winston.error(message);
 	});
 
 	monitor.on('monitor:check:success', function(id){

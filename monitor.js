@@ -132,11 +132,9 @@ Monitor.prototype.check = function(){
 			if (matches) {
 				var id = matches[0];
 
-				id = 'willfail';
-
 				// check id
 				if (id != self.currRandom) {
-					self.emit('monitor:check:error', id);
+					self.emit('monitor:check:error', ('Monitor - test fails with ID: ' + id + '! Wrong ID.'));
 				} else {
 					self.emit('monitor:check:success', id);
 				}
@@ -146,11 +144,11 @@ Monitor.prototype.check = function(){
 			// reset lastMail
 			delete self.lastMail;
 
-		} else if (!self.lastMail) {
-			self.emit('monitor:check:error', self.currRandom);
+		} else if (!self.lastMail && self.currRandom) {
+			self.emit('monitor:check:error', ('Monitor - test fails with ID: ' + self.currRandom + '! No new mail.'));
 		}
 
-	}, 1000 * 60 * 10);
+	}, 1000 * 60 * 20);
 
 };
 
