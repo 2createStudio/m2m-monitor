@@ -34,6 +34,7 @@ Monitor.prototype.setup = function(imap){
 
 	// create instance
 	this.notifier = notifier(imap);
+	console.log("Notifier connected. ");
 
 	// setup events
 	this.notifier.on('mail', function(mail){
@@ -84,6 +85,12 @@ Monitor.prototype.start = function(emailer, message, transport){
 		emailer.send(message, transport);
 
 	}, 1000 * 60 * 60);
+
+	// generate random string & update the message
+	self.currRandom = message.text = '[' + self.random() + ']';
+
+	// send the test message
+	emailer.send(message, transport);
 
 };
 
@@ -148,7 +155,7 @@ Monitor.prototype.check = function(){
 			self.emit('monitor:check:error', ('Monitor - test fails with ID: ' + self.currRandom + '! No new mail.'));
 		}
 
-	}, 1000 * 60 * 20);
+	}, /*1000 * 60 * 20*/ 1000);
 
 };
 

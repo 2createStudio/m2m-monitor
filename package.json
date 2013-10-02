@@ -1,4 +1,6 @@
 {
+  "name": "m2m-monitor",
+  "version": "1.0.0",
   "dependencies": {
     "nodemailer": "~0.5.2",
     "winston": "~0.7.2",

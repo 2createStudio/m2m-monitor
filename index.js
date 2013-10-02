@@ -45,6 +45,7 @@ function init(){
 	// setup logs
 	setup_logging();
 
+
 	// setup & start monitor 
 	monitor.setup(config.imap);
 	monitor.start(emailer, config.message, config.transport);
