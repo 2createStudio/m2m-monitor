@@ -35,6 +35,14 @@ exports.config = {
 		"password": "samplePassword",
 		"subject": "{{level}}",
 		"level": "error"
-	}
+	},
+
+	"timers": {
+		"send": 1000 * 60 * 60,
+		"check": 1000 * 60 * 55,
+		"warning": 1000 * 60 * 20
+	},
+
+	"startImmediately": true
 	
 };

@@ -47,7 +47,7 @@ function init(){
 
 
 	// setup & start monitor 
-	monitor.setup(config.imap);
+	monitor.setup(config);
 	monitor.start(emailer, config.message, config.transport);
 
 	// setup email events
@@ -64,8 +64,8 @@ function init(){
 	});
 
 	// setup monitor events
-	monitor.on('monitor:check:error', function(message){
-		winston.error(message);
+	monitor.on('monitor:check:error', function(error){
+		winston.error('Monitor - test fails with ID: ' + error.id + '! ' + error.reason);
 	});
 
 	monitor.on('monitor:check:success', function(id){
@@ -78,6 +78,14 @@ function init(){
 
 	monitor.on('monitor:mail:error', function(error){
 		winston.error('Monitor - there is an error with imap!', { error: error });
+	});
+
+	monitor.on('monitor:warning', function(message){
+		winston.error('Monitor - There was a delay!');
+	});
+
+	monitor.on('monitor:repair', function(message){
+		winston.error('Monitor - The system has been restored!');
 	});
 
 };

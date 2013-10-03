@@ -9,7 +9,7 @@ var notifier = require('mail-notifier'),
  * @constructor
  * @description Generates a Monitor object
  */
-function Monitor(imap){
+function Monitor(){
 
 	// create emitter
 	events.EventEmitter.call(this);
@@ -25,16 +25,22 @@ exports.Monitor = Monitor;
 /**
  * @method setup
  * @memberOf Monitor
- * @param {Object} imap 
+ * @param {Object} config 
  * @description Setups the module
  */
-Monitor.prototype.setup = function(imap){
+Monitor.prototype.setup = function(config){
 
 	var self = this;
 
+	// cache config
+	this.config = config;
+
+	// setup self repair counter
+	this.repairCounter = 0;
+	this.doOnce = true;
+
 	// create instance
-	this.notifier = notifier(imap);
-	console.log("Notifier connected. ");
+	this.notifier = notifier(config.imap);
 
 	// setup events
 	this.notifier.on('mail', function(mail){
@@ -78,19 +84,15 @@ Monitor.prototype.start = function(emailer, message, transport){
 	// send test message on every 60 minutes
 	this.interval = setInterval(function(){
 
-		// generate random string & update the message
-		self.currRandom = message.text = '[' + self.random() + ']';
+		self.send(emailer, message, transport);
 
-		// send the test message
-		emailer.send(message, transport);
+	}, this.config.timers.send);
 
-	}, 1000 * 60 * 60);
 
-	// generate random string & update the message
-	self.currRandom = message.text = '[' + self.random() + ']';
-
-	// send the test message
-	emailer.send(message, transport);
+	// send test message on startup
+	if (this.config.startImmediately) {
+		this.send(emailer, message, transport);
+	}
 
 };
 
@@ -115,6 +117,24 @@ Monitor.prototype.stop = function(){
 };
 
 /**
+ * @method send
+ * @memberOf Monitor
+ * @param {Object} emailer 
+ * @param {Object} message 
+ * @param {Object} transport 
+ * @description Sends a test message
+ */
+Monitor.prototype.send = function(emailer, message, transport){
+
+	// generate random string & update the message
+	this.currRandom = message.text = '[' + this.random() + ']';
+
+	// send the test message
+	emailer.send(message, transport);
+
+};
+
+/**
  * @method check
  * @memberOf Monitor
  * @description Checks the email
@@ -124,38 +144,75 @@ Monitor.prototype.check = function(){
 	var self = this;
 
 	// clear timer
-	if (self.timer) {
-		clearTimeout(self.timer);
+	if (this.timer) {
+		clearTimeout(this.timer);
 	}
 
-	// set timer
-	self.timer = setTimeout(function(){
+	if (this.warningTimer) {
+		clearTimeout(this.warningTimer);
+	}
 
-		if (self.lastMail && self.currRandom) {
+	// set warning timer
+	this.warningTimer = setTimeout(function(){
 
-			// get id
-			var matches = self.lastMail.html.match("\\[.*\\]");
-
-			if (matches) {
-				var id = matches[0];
-
-				// check id
-				if (id != self.currRandom) {
-					self.emit('monitor:check:error', ('Monitor - test fails with ID: ' + id + '! Wrong ID.'));
-				} else {
-					self.emit('monitor:check:success', id);
-				}
-
-			}
-
-			// reset lastMail
-			delete self.lastMail;
-
-		} else if (!self.lastMail && self.currRandom) {
-			self.emit('monitor:check:error', ('Monitor - test fails with ID: ' + self.currRandom + '! No new mail.'));
+		if (!self.lastMail && self.currRandom) {
+			self.emit('monitor:warning');
 		}
 
-	}, /*1000 * 60 * 20*/ 1000);
+	}, this.config.timers.warning);
+
+	// set timer
+	this.timer = setTimeout(function(){
+
+		// clear warning timer
+		clearTimeout(self.warningTimer);
+
+		if (self.currRandom) {
+
+			if (self.lastMail) {
+
+				// get id
+				var matches = self.lastMail.html.match("\\[.*\\]");
+
+				if (matches) {
+					var id = matches[0];
+
+					if (self.doOnce) {
+						self.doOnce = false;
+						id = 'willfail';
+					}
+
+					// check id
+					if (id != self.currRandom) {
+						self.emit('monitor:check:error', { id: id, reason: '[Wrong ID]' });
+
+						// update counter
+						self.repairCounter++;
+
+					} else {
+						self.emit('monitor:check:success', id);
+
+						if (self.repairCounter > 0) {
+							self.repairCounter = 0;
+							self.emit('monitor:repair');
+						}
+					}
+
+				}
+
+				// reset lastMail
+				delete self.lastMail;
+
+			} else {
+				self.emit('monitor:check:error', { id: self.currRandom, reason: '[No new mail]' });
+
+				// update counter
+				self.repairCounter++;
+			}
+
+		}
+
+	}, this.config.timers.check);
 
 };
 
