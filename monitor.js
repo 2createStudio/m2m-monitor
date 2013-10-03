@@ -176,11 +176,12 @@ Monitor.prototype.check = function(){
 
 				if (matches) {
 					var id = matches[0];
-
+					/*
 					if (self.doOnce) {
 						self.doOnce = false;
 						id = 'willfail';
 					}
+					*/
 
 					// check id
 					if (id != self.currRandom) {
