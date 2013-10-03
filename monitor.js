@@ -37,7 +37,9 @@ Monitor.prototype.setup = function(config){
 
 	// setup self repair counter
 	this.repairCounter = 0;
-	this.doOnce = true;
+
+	// update flag
+	this.forceFail = config.forceFail;
 
 	// create instance
 	this.notifier = notifier(config.imap);
@@ -176,12 +178,12 @@ Monitor.prototype.check = function(){
 
 				if (matches) {
 					var id = matches[0];
-					/*
-					if (self.doOnce) {
-						self.doOnce = false;
+
+					// force fail at startup	
+					if (self.forceFail) {
+						self.forceFail = false;
 						id = 'willfail';
 					}
-					*/
 
 					// check id
 					if (id != self.currRandom) {

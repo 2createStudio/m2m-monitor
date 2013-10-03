@@ -43,6 +43,7 @@ exports.config = {
 		"warning": 1000 * 60 * 20
 	},
 
-	"startImmediately": true
+	"startImmediately": true,
+	"forceFail": false
 	
 };
